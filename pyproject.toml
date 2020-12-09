@@ -6,6 +6,7 @@ authors = ["Edward Iskandarov <edward@craftly.tech>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
+whois = "^0.9.7"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.1.2"
