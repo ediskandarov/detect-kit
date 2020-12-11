@@ -3,12 +3,12 @@ from detect_kit.models import CertificateModel
 
 
 def test_fetch_python_org_domain_certificate():
-    site = 'https://python.org/'
+    site = "https://python.org/"
     cert = CertificateModel.from_url(site)
 
-    assert cert.subject.common_name == 'www.python.org'
-    assert cert.issuer.common_name == 'DigiCert SHA2 Extended Validation Server CA'
-    cert.match_hostname('python.org')
+    assert cert.subject.common_name == "www.python.org"
+    assert cert.issuer.common_name == "DigiCert SHA2 Extended Validation Server CA"
+    cert.match_hostname("python.org")
 
 
 def test_model_parses_python_org_cert():

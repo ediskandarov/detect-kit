@@ -94,7 +94,7 @@ class CertificateModel(BaseModel):
     @retry(reraise=True, stop=stop_after_attempt(3))
     def from_url(cls, url: str, timeout: float = 5) -> CertificateModel:
         bits = urlparse(url)
-        hostname, _, port = bits.netloc.partition(':')
+        hostname, _, port = bits.netloc.partition(":")
         # if port is provided - cast value to int, otherwise use default https port number
         port = int(port) if port else 443
 
