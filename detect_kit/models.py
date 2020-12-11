@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 from datetime import datetime
+import socket
 import ssl
+from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field, validator
 from typing import List, Tuple, Optional
@@ -70,7 +74,7 @@ class CertificateModel(BaseModel):
             not_after = datetime.utcfromtimestamp(timestamp)
             return not_after
 
-    def match_hostname(self, hostname) -> bool:
+    def match_hostname(self, hostname: str) -> bool:
         cert = {
             "subject": ((("commonName", self.subject.common_name),),),
         }
@@ -84,3 +88,18 @@ class CertificateModel(BaseModel):
             return False
         else:
             return True
+
+    @classmethod
+    def from_url(cls, url: str) -> CertificateModel:
+        bits = urlparse(url)
+        hostname, _, port = bits.netloc.partition(':')
+        # if port is provided - cast value to int, otherwise use default https port number
+        port = int(port) if port else 443
+
+        context = ssl.create_default_context()
+        with socket.create_connection((hostname, port)) as sock:
+            with context.wrap_socket(sock, server_hostname=hostname) as ssock:
+                cert = ssock.getpeercert()
+
+        obj = cls.parse_obj(cert)
+        return obj
