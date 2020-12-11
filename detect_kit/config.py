@@ -1,5 +1,6 @@
-from pydantic import BaseModel, HttpUrl, Field
 from typing import List, Optional
+
+from pydantic import BaseModel, Field, HttpUrl
 
 
 class CertificateCheck(BaseModel):

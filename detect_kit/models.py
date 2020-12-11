@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from datetime import datetime
 import socket
 import ssl
+from datetime import datetime
+from typing import List, Optional, Tuple
 from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field, validator
-from typing import List, Tuple, Optional
 from tenacity import retry, stop_after_attempt
 
 

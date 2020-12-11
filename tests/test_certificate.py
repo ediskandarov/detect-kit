@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from detect_kit.models import CertificateModel
 
 
