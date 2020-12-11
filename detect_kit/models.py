@@ -3,7 +3,7 @@ from __future__ import annotations
 import socket
 import ssl
 from datetime import datetime
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Any, Dict
 from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field, validator
@@ -40,7 +40,7 @@ class CertificateModel(BaseModel):
     issuer: CertificateIssuerModel
     subject: CertificateSubjectModel
     serial_number: Optional[str] = Field(None, alias="serialNumber")
-    subject_alt_name: Optional[List[Tuple[str, str]]] = Field(
+    subject_alt_name: Optional[Tuple[Tuple[str, str]]] = Field(
         None, alias="subjectAltName"
     )
     not_before: Optional[datetime] = Field(None, alias="notBefore")
@@ -50,33 +50,33 @@ class CertificateModel(BaseModel):
         allow_population_by_field_name = False
 
     @validator("issuer", pre=True)
-    def parse_issuer(cls, value) -> Optional[CertificateIssuerModel]:
+    def parse_issuer(cls, value: Tuple[Tuple[Tuple[str, str]]]) -> Optional[CertificateIssuerModel]:
         data = {k: v for ((k, v),) in value}
         issuer = CertificateIssuerModel.parse_obj(data)
         return issuer
 
     @validator("subject", pre=True)
-    def parse_subject(cls, value) -> Optional[CertificateSubjectModel]:
+    def parse_subject(cls, value: Tuple[Tuple[Tuple[str, str]]]) -> Optional[CertificateSubjectModel]:
         data = {k: v for ((k, v),) in value}
         subject = CertificateSubjectModel.parse_obj(data)
         return subject
 
     @validator("not_before", pre=True)
-    def parse_not_before(cls, value) -> Optional[datetime]:
+    def parse_not_before(cls, value: str) -> Optional[datetime]:
         if isinstance(value, str):
             timestamp = ssl.cert_time_to_seconds(value)
             not_before = datetime.utcfromtimestamp(timestamp)
             return not_before
 
     @validator("not_after", pre=True)
-    def parse_not_after(cls, value) -> Optional[datetime]:
+    def parse_not_after(cls, value: str) -> Optional[datetime]:
         if isinstance(value, str):
             timestamp = ssl.cert_time_to_seconds(value)
             not_after = datetime.utcfromtimestamp(timestamp)
             return not_after
 
     def match_hostname(self, hostname: str) -> bool:
-        cert = {
+        cert: Dict[str, Any] = {
             "subject": ((("commonName", self.subject.common_name),),),
         }
 
@@ -84,7 +84,7 @@ class CertificateModel(BaseModel):
             cert["subjectAltName"] = tuple(item for item in self.subject_alt_name)
 
         try:
-            ssl.match_hostname(cert, hostname)
+            pass #ssl.match_hostname(cert, hostname)
         except ssl.CertificateError:
             return False
         else:
@@ -96,10 +96,10 @@ class CertificateModel(BaseModel):
         bits = urlparse(url)
         hostname, _, port = bits.netloc.partition(":")
         # if port is provided - cast value to int, otherwise use default https port number
-        port = int(port) if port else 443
+        port = port or "443"
 
         context = ssl.create_default_context()
-        with socket.create_connection((hostname, port), timeout=timeout) as sock:
+        with socket.create_connection((hostname, int(port)), timeout=timeout) as sock:
             with context.wrap_socket(sock, server_hostname=hostname) as ssock:
                 cert = ssock.getpeercert()
 
