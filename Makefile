@@ -8,3 +8,6 @@ format:
 	poetry run autoflake --remove-all-unused-imports --recursive --remove-unused-variables --in-place detect_kit tests --exclude=__init__.py
 	poetry run black detect_kit tests
 	poetry run isort --recursive --apply detect_kit tests
+
+test:
+	poetry run pytest tests
