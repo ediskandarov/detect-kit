@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field, validator
 from typing import List, Tuple, Optional
+from tenacity import retry, stop_after_attempt
 
 
 class CertificateIssuerModel(BaseModel):
@@ -90,14 +91,15 @@ class CertificateModel(BaseModel):
             return True
 
     @classmethod
-    def from_url(cls, url: str) -> CertificateModel:
+    @retry(reraise=True, stop=stop_after_attempt(3))
+    def from_url(cls, url: str, timeout: float = 5) -> CertificateModel:
         bits = urlparse(url)
         hostname, _, port = bits.netloc.partition(':')
         # if port is provided - cast value to int, otherwise use default https port number
         port = int(port) if port else 443
 
         context = ssl.create_default_context()
-        with socket.create_connection((hostname, port)) as sock:
+        with socket.create_connection((hostname, port), timeout=timeout) as sock:
             with context.wrap_socket(sock, server_hostname=hostname) as ssock:
                 cert = ssock.getpeercert()
 
