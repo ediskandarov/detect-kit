@@ -3,7 +3,7 @@ from __future__ import annotations
 import socket
 import ssl
 from datetime import datetime
-from typing import List, Optional, Tuple, Any, Dict
+from typing import Any, Dict, Optional, Tuple
 from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field, validator
@@ -50,13 +50,17 @@ class CertificateModel(BaseModel):
         allow_population_by_field_name = False
 
     @validator("issuer", pre=True)
-    def parse_issuer(cls, value: Tuple[Tuple[Tuple[str, str]]]) -> Optional[CertificateIssuerModel]:
+    def parse_issuer(
+        cls, value: Tuple[Tuple[Tuple[str, str]]]
+    ) -> Optional[CertificateIssuerModel]:
         data = {k: v for ((k, v),) in value}
         issuer = CertificateIssuerModel.parse_obj(data)
         return issuer
 
     @validator("subject", pre=True)
-    def parse_subject(cls, value: Tuple[Tuple[Tuple[str, str]]]) -> Optional[CertificateSubjectModel]:
+    def parse_subject(
+        cls, value: Tuple[Tuple[Tuple[str, str]]]
+    ) -> Optional[CertificateSubjectModel]:
         data = {k: v for ((k, v),) in value}
         subject = CertificateSubjectModel.parse_obj(data)
         return subject
@@ -84,7 +88,7 @@ class CertificateModel(BaseModel):
             cert["subjectAltName"] = tuple(item for item in self.subject_alt_name)
 
         try:
-            pass #ssl.match_hostname(cert, hostname)
+            pass  # ssl.match_hostname(cert, hostname)
         except ssl.CertificateError:
             return False
         else:
