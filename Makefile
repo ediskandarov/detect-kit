@@ -10,4 +10,7 @@ format:
 	poetry run isort detect_kit tests
 
 test:
-	poetry run pytest tests -v
+	poetry run pytest tests
+
+detect:
+	poetry run pytest tests -m detection

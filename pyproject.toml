@@ -26,3 +26,11 @@ build-backend = "poetry.core.masonry.api"
 [tool.isort]
 profile = "black"
 multi_line_output = 3
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -v"
+markers = [
+    "lib: mark a test as a detect_kit library.",
+    "detection: mark a test as an issue detection.",
+]

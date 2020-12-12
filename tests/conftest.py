@@ -1,11 +1,13 @@
 from pathlib import Path
-from typing import Any, Callable, Dict
+from typing import Any, Dict
 
 import pytest
 from whois import WhoisEntry, whois
 
 from detect_kit.config import CertificateCheck, DomainCheck, Settings
 from detect_kit.models import CertificateModel
+
+from .types import CertificateFactory, WhoisFactory
 
 
 def certificate_ids(certificate: CertificateCheck) -> str:
@@ -30,7 +32,7 @@ def pytest_generate_tests(metafunc: Any) -> None:
 
 
 @pytest.fixture(scope="session")
-def get_certificate() -> Callable[[CertificateCheck], CertificateModel]:
+def get_certificate() -> CertificateFactory:
     cache: Dict[str, CertificateModel] = {}
 
     def _get_certificate(cert_check: CertificateCheck) -> CertificateModel:
@@ -43,7 +45,7 @@ def get_certificate() -> Callable[[CertificateCheck], CertificateModel]:
 
 
 @pytest.fixture(scope="session")
-def get_whois() -> Callable[[DomainCheck], WhoisEntry]:
+def get_whois() -> WhoisFactory:
     cache: Dict[str, WhoisEntry] = {}
 
     def _get_whois(domain_check: DomainCheck) -> WhoisEntry:
