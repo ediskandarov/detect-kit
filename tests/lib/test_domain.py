@@ -1,14 +1,9 @@
 from datetime import datetime
-from typing import Callable, TypeVar
 
+import pytest
 import whois
-from whois import WhoisEntry
 
-from detect_kit.config import DomainCheck
-
-get_whois_T = TypeVar("get_whois_T", bound=Callable[[DomainCheck], WhoisEntry])
-
-# pytestmark = pytest.mark.skip
+pytestmark = pytest.mark.lib
 
 
 def test_python_org_domain() -> None:
@@ -24,16 +19,3 @@ def test_python_org_domain() -> None:
         "ns-1134.awsdns-13.org",
     }
     assert expected_domains == {d.lower() for d in domain.name_servers}
-
-
-def test_domain_expiration(domain: DomainCheck, get_whois: get_whois_T) -> None:
-    whois = get_whois(domain)
-
-    now = datetime.now()
-    assert whois.expiration_date > now
-
-
-def test_domain_registrar(domain: DomainCheck, get_whois: get_whois_T) -> None:
-    domain_whois = get_whois(domain)
-    if domain.expected_registrar_name is not None:
-        assert domain.expected_registrar_name.lower() == domain_whois.registrar.lower()

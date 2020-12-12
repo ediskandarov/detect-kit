@@ -5,7 +5,7 @@ import pytest
 
 from detect_kit.models import CertificateModel
 
-pytestmark = pytest.mark.skip
+pytestmark = pytest.mark.lib
 
 
 def test_fetch_python_org_domain_certificate() -> None:
