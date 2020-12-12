@@ -25,8 +25,8 @@ class DomainCheck(BaseModel):
 
 
 class DetectKitSettings(BaseModel):
-    certificates: Optional[Sequence[CertificateCheck]]
-    domains: Optional[Sequence[DomainCheck]]
+    certificates: Sequence[CertificateCheck] = Field(default_factory=list)
+    domains: Sequence[DomainCheck] = Field(default_factory=list)
 
 
 class Settings(BaseModel):
