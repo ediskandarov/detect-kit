@@ -22,9 +22,9 @@ def pytest_generate_tests(metafunc: Any) -> None:
     config_file = Path(__file__).parent / "tests.config.yaml"
     settings = Settings.from_config_file(config_file)
 
-    if "site" in metafunc.fixturenames:
+    if "cert_cfg" in metafunc.fixturenames:
         metafunc.parametrize(
-            "site", settings.detect_kit.certificates, ids=certificate_ids
+            "cert_cfg", settings.detect_kit.certificates, ids=certificate_ids
         )
 
     if "domain" in metafunc.fixturenames:

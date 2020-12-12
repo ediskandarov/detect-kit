@@ -94,6 +94,11 @@ class CertificateModel(BaseModel):
         else:
             return True
 
+    def match_site(self, site: str) -> bool:
+        bits = urlparse(site)
+        hostname, _, _ = bits.netloc.partition(":")
+        return self.match_hostname(hostname)
+
     @classmethod
     @retry(reraise=True, stop=stop_after_attempt(3))
     def from_url(cls, url: str, timeout: float = 5) -> CertificateModel:

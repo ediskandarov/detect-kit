@@ -8,10 +8,26 @@ detect_kit:
         - https://www.python.org
       expiration_threshold_days: 30
       expiration_threshold_relative: 10
-      expected_issuer_organisation_name: GTS CA 101
+      expected_issuer_organisation_name: DigiCert Inc
+    - site: https://pypi.io
+      should_match_sites:
+        - https://pypi.io
+        - https://www.python.org
+      expiration_threshold_days: 30
+      expiration_threshold_relative: 10
+      expected_issuer_organisation_name: DigiCert Inc
 
   domains:
     - domain: python.org
+      expiration_threshold_days: 30
+      expiration_threshold_relative: 10
+      expected_name_servers:
+        - ns-981.awsdns-58.net.
+        - ns-1134.awsdns-13.org.
+        - ns-2046.awsdns-63.co.uk.
+        - ns-484.awsdns-60.com.
+      expected_registrar_name: GANDI SAS
+    - domain: pypi.io
       expiration_threshold_days: 30
       expiration_threshold_relative: 10
       expected_name_servers:
