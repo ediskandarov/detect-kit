@@ -1,9 +1,14 @@
 from datetime import datetime
+from typing import Any, Dict
+
+import pytest
 
 from detect_kit.models import CertificateModel
 
+pytestmark = pytest.mark.skip
 
-def test_fetch_python_org_domain_certificate():
+
+def test_fetch_python_org_domain_certificate() -> None:
     site = "https://python.org/"
     cert = CertificateModel.from_url(site)
 
@@ -12,7 +17,7 @@ def test_fetch_python_org_domain_certificate():
     cert.match_hostname("python.org")
 
 
-def test_model_parses_python_org_cert():
+def test_model_parses_python_org_cert() -> None:
     python_org_cert = {
         "OCSP": ("http://ocsp.digicert.com",),
         "caIssuers": (
@@ -78,8 +83,8 @@ def test_model_parses_python_org_cert():
     assert not crt.match_hostname("example.com")
 
 
-def test_model_parses_invalid_cert():
-    python_org_cert = {
+def test_model_parses_invalid_cert() -> None:
+    python_org_cert: Dict[str, Any] = {
         "issuer": tuple(),
         "subject": tuple(),
     }
