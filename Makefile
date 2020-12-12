@@ -1,5 +1,5 @@
 lint:
-	poetry run mypy detect_kit
+	poetry run mypy detect_kit tests
 	poetry run black detect_kit tests --check
 	poetry run isort --check-only detect_kit tests
 	poetry run flake8 detect_kit tests
@@ -10,4 +10,4 @@ format:
 	poetry run isort detect_kit tests
 
 test:
-	poetry run pytest tests
+	poetry run pytest tests -v
