@@ -1,0 +1,22 @@
+version: "1.0"
+detect_kit:
+
+  certificates:
+    - site: https://python.org
+      should_match_sites:
+        - https://pypi.io
+        - https://www.python.org
+      expiration_threshold_days: 30
+      expiration_threshold_relative: 10
+      expected_issuer_organisation_name: GTS CA 101
+
+  domains:
+    - domain: python.org
+      expiration_threshold_days: 30
+      expiration_threshold_relative: 10
+      expected_name_servers:
+        - ns-981.awsdns-58.net.
+        - ns-1134.awsdns-13.org.
+        - ns-2046.awsdns-63.co.uk.
+        - ns-484.awsdns-60.com.
+      expected_registrar_name: GANDI SAS
