@@ -47,7 +47,6 @@ def get_whois() -> Callable[[DomainCheck], WhoisEntry]:
     cache: Dict[str, WhoisEntry] = {}
 
     def _get_whois(domain_check: DomainCheck) -> WhoisEntry:
-        breakpoint()
         domain = domain_check.domain
         if domain not in cache:
             cache[domain] = whois(domain)
