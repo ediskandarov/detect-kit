@@ -13,11 +13,7 @@ def test_certificate_is_active(
 ) -> None:
     cert = get_certificate(cert_cfg)
 
-    now = datetime.utcnow()
-    if cert.not_before is not None:
-        assert now > cert.not_before, f"Certificate not valid before {cert.not_before}"
-    if cert.not_after is not None:
-        assert now < cert.not_after, f"Certificate is not valid after {cert.not_after}"
+    assert not cert.ssl_info.certificate.has_expired()
 
 
 def test_certificate_expiration_check(

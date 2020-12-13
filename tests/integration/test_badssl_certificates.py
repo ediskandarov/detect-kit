@@ -5,6 +5,7 @@ from tests.types import CertificateFactory
 
 pytestmark = pytest.mark.lib
 
+
 @pytest.mark.parametrize(
     "badssl_site, expected",
     [
@@ -16,7 +17,9 @@ pytestmark = pytest.mark.lib
         ("https://pinning-test.badssl.com/", False),
     ],
 )
-def test_badssl_expired(get_certificate: CertificateFactory, badssl_site, expected):
+def test_badssl_expired(
+    get_certificate: CertificateFactory, badssl_site: str, expected: bool
+) -> None:
     cert_cfg = CertificateCheck(
         site=badssl_site,
     )
@@ -33,10 +36,14 @@ def test_badssl_expired(get_certificate: CertificateFactory, badssl_site, expect
         ("https://self-signed.badssl.com/", False),
         ("https://untrusted-root.badssl.com/", False),
         pytest.param("https://revoked.badssl.com/", False, marks=pytest.mark.xfail),
-        pytest.param("https://pinning-test.badssl.com/", False, marks=pytest.mark.xfail),
+        pytest.param(
+            "https://pinning-test.badssl.com/", False, marks=pytest.mark.xfail
+        ),
     ],
 )
-def test_badssl_untrusted(get_certificate: CertificateFactory, badssl_site, expected):
+def test_badssl_untrusted(
+    get_certificate: CertificateFactory, badssl_site: str, expected: bool
+) -> None:
     cert_cfg = CertificateCheck(
         site=badssl_site,
     )
@@ -56,7 +63,9 @@ def test_badssl_untrusted(get_certificate: CertificateFactory, badssl_site, expe
         ("https://pinning-test.badssl.com/", True),
     ],
 )
-def test_badssl_hostname_matches(get_certificate: CertificateFactory, badssl_site, expected):
+def test_badssl_hostname_matches(
+    get_certificate: CertificateFactory, badssl_site: str, expected: bool
+) -> None:
     cert_cfg = CertificateCheck(
         site=badssl_site,
     )

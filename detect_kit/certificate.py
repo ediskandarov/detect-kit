@@ -132,7 +132,7 @@ class CertificateWrapper:
 
         return is_valid
 
-    def get_x509_store(self, no_check_time=False) -> crypto.X509Store:
+    def get_x509_store(self, no_check_time: bool = False) -> crypto.X509Store:
         store = crypto.X509Store()
 
         # Do not check certificate/CRL validity against current time
