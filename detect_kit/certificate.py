@@ -4,6 +4,7 @@ import socket
 from contextlib import closing
 from dataclasses import dataclass
 from datetime import datetime
+from functools import cached_property
 from typing import List, Optional
 from urllib.parse import urlparse
 
@@ -40,13 +41,13 @@ class CertificateWrapper:
         hostname, _, port = bits.netloc.partition(":")
         port = port or "443"
 
-        ssl_info = cls.fetch_certificate(hostname, int(port))
+        ssl_info = cls.fetch_certificate(hostname, int(port), timeout=timeout)
 
         return cls(certificate=ssl_info.crypto_cert, ssl_info=ssl_info)
 
     @staticmethod
-    def fetch_certificate(hostname: str, port: int, timeout: float = 5) -> SSLInfo:
-        with socket.create_connection((hostname, port), timeout=5) as sock:
+    def fetch_certificate(hostname: str, port: int, timeout: float) -> SSLInfo:
+        with socket.create_connection((hostname, port), timeout=timeout) as sock:
             ctx = SSL.Context(SSL.SSLv23_METHOD)  # most compatible
             ctx.check_hostname = False
             ctx.verify_mode = SSL.VERIFY_NONE
@@ -118,15 +119,12 @@ class CertificateWrapper:
     def verify(self) -> bool:
         # https://yothenberg.com/validate-x509-certificate-in-python.html
         # https://github.com/pyca/pyopenssl/pull/948/files
-        store = crypto.X509Store()
-
-        # store.add_cert(root_cert)
-        store.load_locations(cafile=CA_FILE)
         store_ctx = crypto.X509StoreContext(
-            store,
+            self.x509_store,
             self.ssl_info.certificate,
             chain=self.ssl_info.chain,
         )
+
         is_valid = True
         try:
             store_ctx.verify_certificate()
@@ -134,3 +132,12 @@ class CertificateWrapper:
             is_valid = False
 
         return is_valid
+
+    @cached_property
+    def x509_store(self) -> crypto.X509Store:
+        store = crypto.X509Store()
+
+        # store.add_cert(root_cert)
+        store.load_locations(cafile=CA_FILE)
+
+        return store
