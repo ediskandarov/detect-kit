@@ -4,8 +4,8 @@ from typing import Any, Dict
 import pytest
 from whois import WhoisEntry, whois
 
+from detect_kit.certificate import CertificateWrapper
 from detect_kit.config import CertificateCheck, DomainCheck, Settings
-from detect_kit.models import CertificateModel
 
 from .types import CertificateFactory, WhoisFactory
 
@@ -33,12 +33,12 @@ def pytest_generate_tests(metafunc: Any) -> None:
 
 @pytest.fixture(scope="session")
 def get_certificate() -> CertificateFactory:
-    cache: Dict[str, CertificateModel] = {}
+    cache: Dict[str, CertificateWrapper] = {}
 
-    def _get_certificate(cert_check: CertificateCheck) -> CertificateModel:
+    def _get_certificate(cert_check: CertificateCheck) -> CertificateWrapper:
         site = cert_check.site
         if site not in cache:
-            cache[site] = CertificateModel.from_url(site)
+            cache[site] = CertificateWrapper.from_url(site)
         return cache[site]
 
     return _get_certificate

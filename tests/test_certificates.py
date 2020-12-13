@@ -60,13 +60,13 @@ def test_certificate_issuer(
 
     if (
         cert_cfg.expected_issuer_organisation_name is None
-        or cert.issuer.organization_name is None
+        or cert.issuer_common_name is None
     ):
         return
 
     assert (
         cert_cfg.expected_issuer_organisation_name.lower()
-        == cert.issuer.organization_name.lower()
+        == cert.issuer_common_name.lower()
     )
 
 
@@ -89,4 +89,6 @@ def test_certificate_match_sites(
 def test_certificate_is_trusted(
     cert_cfg: CertificateCheck, get_certificate: CertificateFactory
 ) -> None:
-    assert False
+    cert = get_certificate(cert_cfg)
+
+    assert cert.verify()

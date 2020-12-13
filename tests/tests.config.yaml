@@ -8,14 +8,14 @@ detect_kit:
         - https://www.python.org
       expiration_threshold_days: 30
       expiration_threshold_relative: 10
-      expected_issuer_organisation_name: DigiCert Inc
+      expected_issuer_organisation_name: DigiCert SHA2 Extended Validation Server CA
     - site: https://pypi.io
       should_match_sites:
         - https://pypi.io
         - https://www.python.org
       expiration_threshold_days: 30
       expiration_threshold_relative: 10
-      expected_issuer_organisation_name: DigiCert Inc
+      expected_issuer_organisation_name: DigiCert SHA2 Extended Validation Server CA
 
   domains:
     - domain: python.org
