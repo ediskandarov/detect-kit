@@ -14,6 +14,8 @@ from cryptography.x509.oid import NameOID
 from OpenSSL import SSL, crypto
 from service_identity.cryptography import verify_certificate_hostname
 
+CA_FILE = "/etc/ssl/cert.pem"
+
 
 @dataclass
 class SSLInfo:
@@ -28,6 +30,7 @@ class SSLInfo:
 @dataclass
 class CertificateWrapper:
     certificate: x509.Certificate
+    ssl_info: SSLInfo
 
     @classmethod
     def from_url(cls, url: str, timeout: float = 5) -> CertificateWrapper:
@@ -39,7 +42,7 @@ class CertificateWrapper:
 
         ssl_info = cls.fetch_certificate(hostname, int(port))
 
-        return cls(certificate=ssl_info.crypto_cert)
+        return cls(certificate=ssl_info.crypto_cert, ssl_info=ssl_info)
 
     @staticmethod
     def fetch_certificate(hostname: str, port: int, timeout: float = 5) -> SSLInfo:
@@ -112,13 +115,22 @@ class CertificateWrapper:
         hostname, _, _ = bits.netloc.partition(":")
         return self.match_hostname(hostname)
 
-    # def verify(self) -> bool:
-    #     # https://yothenberg.com/validate-x509-certificate-in-python.html
-    #     # https://github.com/pyca/pyopenssl/pull/948/files
-    #     store = crypto.X509Store()
+    def verify(self) -> bool:
+        # https://yothenberg.com/validate-x509-certificate-in-python.html
+        # https://github.com/pyca/pyopenssl/pull/948/files
+        store = crypto.X509Store()
 
-    #     root_cert = None
-    #     verified_cert = None
-    #     store.add_cert(root_cert)
-    #     store_ctx = X509StoreContext(store, verified_cert, chain=chain)
-    #     return store_ctx.verify_certificate() is None
+        # store.add_cert(root_cert)
+        store.load_locations(cafile=CA_FILE)
+        store_ctx = crypto.X509StoreContext(
+            store,
+            self.ssl_info.certificate,
+            chain=self.ssl_info.chain,
+        )
+        is_valid = True
+        try:
+            store_ctx.verify_certificate()
+        except crypto.X509StoreContextError:
+            is_valid = False
+
+        return is_valid

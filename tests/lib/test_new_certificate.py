@@ -10,3 +10,4 @@ def test_certificate_wrapper() -> None:
     assert not cw.match_hostname("example.com")
     assert cw.match_site("https://yandex.net")
     assert not cw.match_site("https://example.com")
+    assert cw.verify()
