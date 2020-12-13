@@ -4,7 +4,6 @@ import socket
 from contextlib import closing
 from dataclasses import dataclass
 from datetime import datetime
-from functools import cached_property
 from typing import List, Optional
 from urllib.parse import urlparse
 
@@ -120,7 +119,7 @@ class CertificateWrapper:
         # https://yothenberg.com/validate-x509-certificate-in-python.html
         # https://github.com/pyca/pyopenssl/pull/948/files
         store_ctx = crypto.X509StoreContext(
-            self.x509_store,
+            self.get_x509_store(no_check_time=True),
             self.ssl_info.certificate,
             chain=self.ssl_info.chain,
         )
@@ -133,11 +132,17 @@ class CertificateWrapper:
 
         return is_valid
 
-    @cached_property
-    def x509_store(self) -> crypto.X509Store:
+    def get_x509_store(self, no_check_time=False) -> crypto.X509Store:
         store = crypto.X509Store()
+
+        # Do not check certificate/CRL validity against current time
+        # https://github.com/openssl/openssl/blob/OpenSSL_1_1_1-stable/include/openssl/x509_vfy.h#L241-L242
+        X509_V_FLAG_NO_CHECK_TIME = 0x200000
 
         # store.add_cert(root_cert)
         store.load_locations(cafile=CA_FILE)
+
+        if no_check_time:
+            store.set_flags(X509_V_FLAG_NO_CHECK_TIME)
 
         return store

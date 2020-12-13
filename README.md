@@ -8,6 +8,7 @@ Detect Kit is a security framework for embedding into CI.
   * expiration
   * hostname match
   * issuer organisation name
+  * certificate trust chain verification
 * Domain checks
   * expiration
   * registrar name
