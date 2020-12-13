@@ -1,17 +1,28 @@
 from __future__ import annotations
 
 import socket
-import ssl
+from contextlib import closing
 from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Optional
 from urllib.parse import urlparse
 
+import idna
 import service_identity
 from cryptography import x509
-from cryptography.hazmat.backends import default_backend
 from cryptography.x509.oid import NameOID
+from OpenSSL import SSL, crypto
 from service_identity.cryptography import verify_certificate_hostname
+
+
+@dataclass
+class SSLInfo:
+    certificate: crypto.X509
+    chain: List[crypto.x509]
+
+    @property
+    def crypto_cert(self) -> x509.Certificate:
+        return self.certificate.to_cryptography()
 
 
 @dataclass
@@ -20,26 +31,39 @@ class CertificateWrapper:
 
     @classmethod
     def from_url(cls, url: str, timeout: float = 5) -> CertificateWrapper:
+        # https://gist.github.com/brandond/f3d28734a40c49833176207b17a44786
+        # https://gist.github.com/gdamjan/55a8b9eec6cf7b771f92021d93b87b2c
         bits = urlparse(url)
         hostname, _, port = bits.netloc.partition(":")
         port = port or "443"
 
-        context = ssl.create_default_context()
-        with socket.create_connection((hostname, int(port)), timeout=timeout) as sock:
-            with context.wrap_socket(sock, server_hostname=hostname) as ssock:
-                der_data = ssock.getpeercert(binary_form=True)
+        ssl_info = cls.fetch_certificate(hostname, int(port))
 
-        if der_data:
-            cert = x509.load_der_x509_certificate(der_data, default_backend())
-        else:
-            raise ValueError(
-                (
-                    "There is no certificate for the peer "
-                    "on the other end of the connection"
-                )
-            )
+        return cls(certificate=ssl_info.crypto_cert)
 
-        return cls(certificate=cert)
+    @staticmethod
+    def fetch_certificate(hostname: str, port: int, timeout: float = 5) -> SSLInfo:
+        with socket.create_connection((hostname, port), timeout=5) as sock:
+            ctx = SSL.Context(SSL.SSLv23_METHOD)  # most compatible
+            ctx.check_hostname = False
+            ctx.verify_mode = SSL.VERIFY_NONE
+
+            with closing(SSL.Connection(ctx, sock)) as sock_ssl:
+                # Workaround for timeout and OpenSSL.SSL.WantReadError
+                # https://github.com/pyca/pyopenssl/issues/168
+                sock_ssl.setblocking(1)
+
+                sock_ssl.set_connect_state()
+                hostname_idna = idna.encode(hostname)
+                sock_ssl.set_tlsext_host_name(hostname_idna)
+
+                sock_ssl.do_handshake()
+                cert: crypto.X509 = sock_ssl.get_peer_certificate()
+                chain: List[crypto.X509] = sock_ssl.get_peer_cert_chain()
+
+        ssl_info = SSLInfo(certificate=cert, chain=chain)
+
+        return ssl_info
 
     @property
     def not_before(self) -> datetime:
