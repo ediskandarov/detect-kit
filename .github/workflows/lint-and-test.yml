@@ -9,7 +9,7 @@ on:
 
 jobs:
   lint-and-test:
-    name: Lint and test
+    name: LintAndTest
     runs-on: ubuntu-latest
 
     strategy:
