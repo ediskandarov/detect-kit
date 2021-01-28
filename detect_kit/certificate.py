@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import platform
 import socket
 from contextlib import closing
 from dataclasses import dataclass
@@ -13,8 +14,6 @@ from cryptography import x509
 from cryptography.x509.oid import NameOID
 from OpenSSL import SSL, crypto
 from service_identity.cryptography import verify_certificate_hostname
-
-CA_FILE = "/etc/ssl/cert.pem"
 
 
 @dataclass
@@ -140,9 +139,22 @@ class CertificateWrapper:
         X509_V_FLAG_NO_CHECK_TIME = 0x200000
 
         # store.add_cert(root_cert)
-        store.load_locations(cafile=CA_FILE)
+        store.load_locations(cafile=self.ca_file)
 
         if no_check_time:
             store.set_flags(X509_V_FLAG_NO_CHECK_TIME)
 
         return store
+
+    @property
+    def ca_file(self) -> str:
+        macOS_CA_FILE = "/etc/ssl/cert.pem"
+        ubuntu_CA_FILE = "/etc/ssl/certs/ca-certificates.crt"
+
+        system = platform.system()
+        if system == "Linux":
+            return ubuntu_CA_FILE
+        elif system == "Darwin":
+            return macOS_CA_FILE
+        else:
+            raise RuntimeError("Uncompatible system")
