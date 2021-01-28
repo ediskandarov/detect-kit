@@ -19,7 +19,7 @@ from service_identity.cryptography import verify_certificate_hostname
 @dataclass
 class SSLInfo:
     certificate: crypto.X509
-    chain: List[crypto.x509]
+    chain: List[crypto.X509]
 
     @property
     def crypto_cert(self) -> x509.Certificate:
